@@ -24,6 +24,8 @@ app.use(express.json())
 app.use(bodyParser.json())
 app.use(methodOverride('_method'))
 
+
+
 const db = mongoose.connection
 db.once('open', _ =>{
   console.log('Database connected:', connection_url)
@@ -32,24 +34,25 @@ db.on('error', err =>{
   console.error('Connection error:', err)
 })
 
+
+
 //display all articles on the homepage (Works)
 app.get('/', (req, res) =>{
   Article.find({}, (err, articles) =>{
     res.render('articles/index.ejs', {articles: articles})
   })
 })
-//display all articles on the homepage (Works)
 app.get('/', (req, res) =>{
   res.sendFile('articles/index.ejs')
 })
 
-//get the current UID (default it UID:0)
-//I think this needs 
+//get the UID that is entered in the main page text bar
 app.use(function (req, res) {
   var post_data = req.body.user;
   current_user = post_data;
   console.log("Current UID:",current_user)
 })
+
 //redirect to the new article window (Works)
 app.get('/new', (req, res) =>{
   res.render('articles/new.ejs', { article: new Article() })
