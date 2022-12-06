@@ -1,10 +1,17 @@
 const express = require('express')
 const mongoose = require('mongoose')
+
+const validator = require('express-validator')
+const body = validator.body
+const validationResult = validator.validationResult
+
 const Article = require('./models/article.js')
 const Read = require('./models/read.js')
 const User = require('./models/user.js')
+
 const methodOverride = require('method-override')
 const router = express.Router()
+var current_user = 0
 
 const app = express()
 
@@ -31,23 +38,35 @@ app.get('/', (req, res) =>{
   })
 })
 
+//get the current UID (default it UID:0)
+//I think this needs 
+app.post('/currentUser', (res, req) =>{
+  current_user = req.user
+  console.log("Current User:", current_user)
+})
+
 //redirect to the new article window (Works)
 app.get('/new', (req, res) =>{
   res.render('articles/new.ejs', { article: new Article() })
 })
 
-//delete an article (CANNOT DELETE /id)
-router.delete('/id', async (res, req) => {
-  await Article.delete({aid: req.params.id})
+//delete an article (CANNOT DELETE /id) --> now can delete
+app.delete('/del/:aid', async (req, res) => {
+  await Article.deleteOne({aid: req.params.aid})
   return res.redirect('/')
 })
 
-//show contents of an article (CANNOT GET /id)
-router.get('/id', async (req, res) => {
-  const article = await Article.find({aid: req.params.id})
+//show contents of an article (CANNOT GET /id) --> now can get
+app.get('/show/:aid', async (req, res) => {
+  const article = await Article.find({aid: req.params.aid}, )
   if (article == null) res.redirect('/')
-  res.render('articles/show.ejs', { article: article })
+  res.render('articles/show.ejs', { article: article[0] })
 })
+
+//show articles that a given user has read
+
+
+//show popular articles(requires be read table)
 
 
 app.use('/articles', router)

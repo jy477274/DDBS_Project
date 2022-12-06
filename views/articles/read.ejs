@@ -9,18 +9,8 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="mb-4">All Articles</h1>
-
-    <div class="form-group">
-      <form action="/currentUser" method="post">
-        <label for="user">Enter User ID</label>
-        <input required value="0" type="text" name="user" id="user" class="form-control">
-        <br>
-        <button type ="submit">Submit</button>
-      </form>
-    </div>
-
-    <a href="/read" class="btn btn-success">Read by User</a>
+    <h1 class="mb-4">Read by Current User</h1>
+    <a href="/" class="btn btn-secondary">Cancel</a>
 
     <% articles.forEach(article => { %>
       <div class="card mt-4">
