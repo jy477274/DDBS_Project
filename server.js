@@ -1,9 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
-
-const validator = require('express-validator')
-const body = validator.body
-const validationResult = validator.validationResult
+var http = require("http")
+var bodyParser = require('body-parser')
 
 const Article = require('./models/article.js')
 const Read = require('./models/read.js')
@@ -21,6 +19,9 @@ mongoose.connect(connection_url)
 
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.json())
+app.use(bodyParser.json())
 app.use(methodOverride('_method'))
 
 const db = mongoose.connection
@@ -37,14 +38,18 @@ app.get('/', (req, res) =>{
     res.render('articles/index.ejs', {articles: articles})
   })
 })
+//display all articles on the homepage (Works)
+app.get('/', (req, res) =>{
+  res.sendFile('articles/index.ejs')
+})
 
 //get the current UID (default it UID:0)
 //I think this needs 
-app.post('/currentUser', (res, req) =>{
-  current_user = req.user
-  console.log("Current User:", current_user)
+app.use(function (req, res) {
+  var post_data = req.body.user;
+  current_user = post_data;
+  console.log("Current UID:",current_user)
 })
-
 //redirect to the new article window (Works)
 app.get('/new', (req, res) =>{
   res.render('articles/new.ejs', { article: new Article() })
