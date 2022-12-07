@@ -42,20 +42,26 @@ app.get('/', (req, res) =>{
     res.render('articles/index.ejs', {articles: articles})
   })
 })
-app.get('/', (req, res) =>{
-  res.sendFile('articles/index.ejs')
-})
 
 //get the UID that is entered in the main page text bar
-app.use(function (req, res) {
-  var post_data = req.body.user;
-  current_user = post_data;
-  console.log("Current UID:",current_user)
-})
+//app.use('/', (req, res) => {
+//  var post_data = req.body.user;
+//  current_user = post_data;
+//  console.log("Current UID:",current_user)
+//})
 
-//redirect to the new article window (Works)
-app.get('/new', (req, res) =>{
-  res.render('articles/new.ejs', { article: new Article() })
+//redirect to user-read page and send in articles grouped by UID
+//displays one article and then throws
+//req.next is not a function
+app.get('/read', (req, res, next) =>{
+
+  var article_ids = new Array()
+  Read.find({uid:"0"}).cursor().eachAsync(async function(item){
+    article_ids.push(item.aid)
+
+    const articles = await Article.find().where('aid').in(article_ids).exec()
+    res.render('articles/read.ejs', { articles: articles })
+  })
 })
 
 //delete an article (CANNOT DELETE /id) --> now can delete
