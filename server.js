@@ -8,6 +8,8 @@ const Read = require('./models/read.js')
 const User = require('./models/user.js')
 
 const methodOverride = require('method-override')
+const article = require('./models/article.js')
+const { render } = require('ejs')
 const router = express.Router()
 var current_user = 0
 
@@ -39,6 +41,7 @@ db.on('error', err =>{
 //display all articles on the homepage (Works)
 app.get('/', (req, res) =>{
   Article.find({}, (err, articles) =>{
+    console.log("TOUUUU")
     res.render('articles/index.ejs', {articles: articles})
   })
 })
@@ -53,14 +56,12 @@ app.get('/', (req, res) =>{
 //redirect to user-read page and send in articles grouped by UID
 //displays one article and then throws
 //req.next is not a function
-app.get('/read', (req, res, next) =>{
-
-  var article_ids = new Array()
-  Read.find({uid:"0"}).cursor().eachAsync(async function(item){
-    article_ids.push(item.aid)
-
-    const articles = await Article.find().where('aid').in(article_ids).exec()
-    res.render('articles/read.ejs', { articles: articles })
+app.get('/read', (req, res) =>{
+  Read.find({uid: current_user.toString()}, (err, reads) => {
+    console.log(reads)
+    Article.find({aid: reads.map(r => r.aid)}, (err, articles)=> {
+      res.render('articles/read.ejs', { articles: articles })
+    })
   })
 })
 
