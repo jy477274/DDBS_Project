@@ -17,8 +17,6 @@ const { render } = require('ejs')
 const { GridFsStorage } = require('multer-gridfs-storage/lib/gridfs.js')
 const router = express.Router()
 
-var current_user = 0
-
 const app = express()
 
 
@@ -34,7 +32,6 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(express.json())
 app.use(bodyParser.json())
 app.use(methodOverride('_method'))
-
 
 //connect to structured data db
 const db = mongoose.connection
@@ -56,13 +53,67 @@ grid_connect.once('open', () =>{
   console.log("Connected to gridfs on:", gridfs_url)
 })
 
-
+function QuickSortArticles(arr, left = 0, right = arr.length - 1) {
+  let len = arr.length,
+  index
+  if(len > 1) {
+    index = partition(arr, left, right)
+  if(left < index - 1) {
+    QuickSortArticles(arr, left, index - 1)
+  }
+  if(index < right) {
+    QuickSortArticles(arr, index, right)
+  }
+  }
+    return arr
+  }
+  function partition(arr, left, right) {
+    let middle = Math.floor((right + left) / 2),
+    pivot = arr[middle].aid,
+    i = left, // Start pointer at the first item in the array
+    j = right // Start pointer at the last item in the array
+    while(i <= j) {
+      // Move left pointer to the right until the value at the
+      // left is greater than the pivot value
+      while(arr[i].aid < pivot) {
+        i++
+      }
+      // Move right pointer to the left until the value at the
+      // right is less than the pivot value
+      while(arr[j].aid > pivot) {
+        j--
+      }
+      // If the left pointer is less than or equal to the
+      // right pointer, then swap values
+      if(i <= j) {
+        [arr[i], arr[j]] = [arr[j], arr[i]] // ES6 destructuring swap
+        i++
+        j--
+      }
+    }
+    return i
+  }
 
 //display all articles on the homepage (Works)
 app.get('/', (req, res) =>{
   Article.find({}, (err, articles) =>{
-    res.render('articles/index.ejs', {articles: articles})
+    const pageCount = Math.ceil(articles.length / 20);
+    let page = parseInt(req.query.p);
+    if (!page) { page = 1;}
+    if (page > pageCount) {
+      page = pageCount
+    }
+    console.log(current_user)
+    QuickSortArticles(articles)
+    res.render('articles/index.ejs', {
+      articles: articles, 
+      user_id: current_user,
+      "page": page,
+      "pageCount": pageCount,
+      "posts": articles.slice(page * 20 - 20, page * 20)
+    })
   })
+  current_user = req.query.user_id
 })
 
 
@@ -72,7 +123,8 @@ app.get('/', (req, res) =>{
 app.get('/read', (req, res) =>{
   Read.find({uid: current_user.toString()}, (err, reads) => {
     Article.find({aid: reads.map(r => r.aid)}, (err, articles)=> {
-      res.render('articles/read.ejs', { articles: articles })
+      QuickSortArticles(articles)
+      res.render('articles/read.ejs', { articles: articles, user_id: current_user })
     })
   })
 })
@@ -82,7 +134,6 @@ app.delete('/del/:aid', async (req, res) => {
   await Article.deleteOne({aid: req.params.aid})
   return res.redirect('/')
 })
-
 //show contents of an article (CANNOT GET /id) --> now can get
 app.get('/show/:aid', async (req, res) => {
   const article = await Article.find({aid: req.params.aid}, )

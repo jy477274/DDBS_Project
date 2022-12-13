@@ -9,24 +9,40 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="mb-4">Read by Current User</h1>
-    <a href="/" class="btn btn-secondary">Back to All Articles</a>
-
-    <% articles.forEach(article => { %>
+    <h1 class="mb-4">Read by Current User <%=user_id%></h1>
+    <form action="/" method="GET">
+      <input href="/" class="btn btn-secondary" value="Back to All Articles" type="submit">     
+    </form>
+    <% if (articles.length==0) {%>
       <div class="card mt-4">
         <div class="card-body">
-          <h4 class="card-title"><%= article.title %></h4>
-          <div class="card-subtitle text-muted mb-2">
-            <%= article.category %>
-          </div>
-          <div class="card-text mb-2"><%= article.abstract %></div>
-          <a href="/show/<%= article.aid %>" class="btn btn-primary">Read More</a>
-          <form action="/del/<%= article.aid %>?_method=DELETE" method="POST" class="d-inline">
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
+          <h4 class="card-title">No articles read for this user</h4>
         </div>
       </div>
-    <% }) %>
+    <%}%>
+    <% if (articles==null) {%>
+      <div class="card mt-4">
+        <div class="card-body">
+          <h4 class="card-title">No user selected</h4>
+        </div>
+      </div>
+    <%}%>
+
+      <% articles.forEach(article => { %>
+        <div class="card mt-4">
+          <div class="card-body">
+            <h4 class="card-title"><%= article.title %></h4>
+            <div class="card-subtitle text-muted mb-2">
+              <%= article.category %>
+            </div>
+            <div class="card-text mb-2"><%= article.abstract %></div>
+            <a href="/show/<%= article.aid %>" class="btn btn-primary">Read More</a>
+            <form action="/del/<%= article.aid %>?_method=DELETE" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
   </div>
 </body>
 </html>

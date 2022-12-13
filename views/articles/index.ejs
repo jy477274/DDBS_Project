@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<head>
+  <title>Basic User Information</title>
+</head>
+
+ 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,18 +17,22 @@
   <div class="container">
     <h1 class="mb-4">All Articles</h1>
 
-    <label for="user">Choose a UID to test:</label>
-    <form id="select_user" action="/" method="post">
-      <select required name="user" id="user">
-        <option value="0">UID: 0</option>
-        <option value="1">UID: 1</option>
-        <option value="2">UID: 2</option>
-        <option value="3">UID: 3</option>
-      </select>
-      <input type="submit" id="submit_user" value="Select">
-    </form>
+  <label for="user"><% if(user_id==null) {%> 
+    No user selected
+  <%} else { %>
+    Current user = User<%=user_id%>
+  <%}%>, select a new user here:</label>
+    <body>
+      <form action="/" method="GET">
+        UserId: <input type="text" name="user_id">
+        <input type="submit" value="submit">        
+      </form>
+    </body>
+    <br></br>
 
-    <a href="/read" class="btn btn-success">Read by User</a>
+    <form action="/read" method="GET">
+      <input class="btn btn-success" value="Read by User" type="submit">     
+    </form>
 
     <% articles.forEach(article => { %>
       <div class="card mt-4">
