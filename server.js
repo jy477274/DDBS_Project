@@ -12,6 +12,8 @@ const fs = require('fs')
 const Article = require('./models/article.js')
 const Read = require('./models/read.js')
 const User = require('./models/user.js')
+const BeRead = require('./models/beread.js')
+const PopRank = require('./models/poprank.js')
 
 const { render } = require('ejs')
 const { GridFsStorage } = require('multer-gridfs-storage/lib/gridfs.js')
@@ -24,7 +26,7 @@ const gridfs_url = 'mongodb://localhost:27101/gridfs'
 mongoose.connect(connection_url)
 const grid_connect = mongoose.createConnection(gridfs_url)
 
-//middleware
+// middleware
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -32,7 +34,7 @@ app.use(express.json())
 app.use(bodyParser.json())
 app.use(methodOverride('_method'))
 
-//connect to structured data db
+// connect to structured data db
 const db = mongoose.connection
 db.once('open', _ =>{
   console.log('Database connected:', connection_url)
@@ -68,18 +70,18 @@ function QuickSortArticles(arr, left = 0, right = arr.length - 1) {
   }
   function partition(arr, left, right) {
     let middle = Math.floor((right + left) / 2),
-    pivot = arr[middle].aid,
+    pivot = Number(arr[middle].aid),
     i = left, // Start pointer at the first item in the array
     j = right // Start pointer at the last item in the array
     while(i <= j) {
       // Move left pointer to the right until the value at the
       // left is greater than the pivot value
-      while(arr[i].aid < pivot) {
+      while(Number(arr[i].aid) < pivot) {
         i++
       }
       // Move right pointer to the left until the value at the
       // right is less than the pivot value
-      while(arr[j].aid > pivot) {
+      while(Number(arr[j].aid) > pivot) {
         j--
       }
       // If the left pointer is less than or equal to the
@@ -122,7 +124,6 @@ app.get('/', (req, res) =>{
 //displays one article and then throws
 //currently works for UID:0
 app.get('/read', (req, res) =>{
-  console.log(req.query)
   if (current_user==null){
     user = ""
   }
@@ -133,6 +134,34 @@ app.get('/read', (req, res) =>{
     Article.find({aid: reads.map(r => r.aid)}, (err, articles)=> {
       QuickSortArticles(articles)
       res.render('articles/read.ejs', { articles: articles, user_id:  current_user })
+    })
+  })
+})
+
+app.get('/popRankDaily', (req, res) => {
+  temporalGranularity = 'Daily'
+  PopRank.find({temporalGranularity: temporalGranularity.toLowerCase()}, (err, popRankArticles) => {
+    Article.find({aid: popRankArticles[0].articleAidList}, (err, articles)=>{
+      QuickSortArticles(articles)
+      res.render('articles/poprank.ejs', { articles: articles, user_id:  current_user, temporalGranularity })
+    })
+  })
+})
+app.get('/popRankWeekly', (req, res) => {
+  temporalGranularity = 'Weekly'
+  PopRank.find({temporalGranularity: temporalGranularity.toLowerCase ()}, (err, popRankArticles) => {
+    Article.find({aid: popRankArticles[0].articleAidList}, (err, articles)=>{
+      QuickSortArticles(articles)
+      res.render('articles/poprank.ejs', { articles: articles, user_id:  current_user , temporalGranularity})
+    })
+  })
+})
+app.get('/popRankMonthly', (req, res) => {
+  temporalGranularity= 'Monthly'
+  PopRank.find({temporalGranularity: temporalGranularity.toLowerCase () }, (err, popRankArticles) => {
+    Article.find({aid: popRankArticles[0].articleAidList}, (err, articles)=>{
+      QuickSortArticles(articles)
+      res.render('articles/poprank.ejs', { articles: articles, user_id:  current_user, temporalGranularity})
     })
   })
 })
@@ -151,22 +180,20 @@ app.get('/show/:aid', async (req, res) => {
   const article_text = article[0].text
 
   //read the contents of the file from gridfs
-  // const file = await gridfs.files.findOne({filename:article_text})
-  // var buffer = ""
-  // var readStream = gridfsBucket.openDownloadStream(file._id)
+  const file = await gridfs.files.findOne({filename:article_text})
+  var buffer = ""
+  var readStream = gridfsBucket.openDownloadStream(file._id)
 
-  // readStream.on('data', function(chunk){
-  //   buffer += chunk
-  // })
+  readStream.on('data', function(chunk){
+    buffer += chunk
+  })
 
   //when finished grabbng all of the chunks, show on console
-  // readStream.on('end', function(){
-    
-  //     text:buffer})
-  // })
-  res.render('articles/show.ejs', { 
-    article: article[0],
-  text: article_text})
+  readStream.on('end', function(){
+    res.render('articles/show.ejs', { 
+      article: article[0],
+      text:buffer})
+  })
 
   
 })
