@@ -12,13 +12,14 @@ const fs = require('fs')
 const Article = require('./models/article.js')
 const Read = require('./models/read.js')
 const User = require('./models/user.js')
+const localStorage = require('localStorage')
+
 
 const { render } = require('ejs')
 const { GridFsStorage } = require('multer-gridfs-storage/lib/gridfs.js')
 const router = express.Router()
 
 const app = express()
-
 
 const connection_url = 'mongodb://localhost:27100/ddbs'
 const gridfs_url = 'mongodb://localhost:27101/gridfs'
@@ -94,6 +95,7 @@ function QuickSortArticles(arr, left = 0, right = arr.length - 1) {
     return i
   }
 
+current_user=0
 //display all articles on the homepage (Works)
 app.get('/', (req, res) =>{
   Article.find({}, (err, articles) =>{
@@ -103,7 +105,6 @@ app.get('/', (req, res) =>{
     if (page > pageCount) {
       page = pageCount
     }
-    console.log(current_user)
     QuickSortArticles(articles)
     res.render('articles/index.ejs', {
       articles: articles, 
@@ -113,7 +114,9 @@ app.get('/', (req, res) =>{
       "posts": articles.slice(page * 20 - 20, page * 20)
     })
   })
-  current_user = req.query.user_id
+  if (req.query.user_id != null){
+    current_user = req.query.user_id
+  }
 })
 
 
@@ -121,10 +124,17 @@ app.get('/', (req, res) =>{
 //displays one article and then throws
 //currently works for UID:0
 app.get('/read', (req, res) =>{
-  Read.find({uid: current_user.toString()}, (err, reads) => {
+  console.log(req.query)
+  if (current_user==null){
+    user = ""
+  }
+  else {
+    user = current_user
+  }
+  Read.find({uid:  user.toString()}, (err, reads) => {
     Article.find({aid: reads.map(r => r.aid)}, (err, articles)=> {
       QuickSortArticles(articles)
-      res.render('articles/read.ejs', { articles: articles, user_id: current_user })
+      res.render('articles/read.ejs', { articles: articles, user_id:  current_user })
     })
   })
 })
@@ -143,20 +153,22 @@ app.get('/show/:aid', async (req, res) => {
   const article_text = article[0].text
 
   //read the contents of the file from gridfs
-  const file = await gridfs.files.findOne({filename:article_text})
-  var buffer = ""
-  var readStream = gridfsBucket.openDownloadStream(file._id)
+  // const file = await gridfs.files.findOne({filename:article_text})
+  // var buffer = ""
+  // var readStream = gridfsBucket.openDownloadStream(file._id)
 
-  readStream.on('data', function(chunk){
-    buffer += chunk
-  })
+  // readStream.on('data', function(chunk){
+  //   buffer += chunk
+  // })
 
   //when finished grabbng all of the chunks, show on console
-  readStream.on('end', function(){
-    res.render('articles/show.ejs', { 
-      article: article[0],
-      text:buffer})
-  })
+  // readStream.on('end', function(){
+    
+  //     text:buffer})
+  // })
+  res.render('articles/show.ejs', { 
+    article: article[0],
+  text: article_text})
 
   
 })
