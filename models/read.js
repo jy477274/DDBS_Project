@@ -37,6 +37,15 @@ const readSchema = new mongoose.Schema({
     },
     commentDetail:{
         type: String
+    },
+    region: {
+        type: String
+    },
+    category: {
+        type: String
+    },
+    article_ts: {
+        type: String
     }
 
   })

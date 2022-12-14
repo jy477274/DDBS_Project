@@ -30,9 +30,11 @@
     </body>
     <br></br>
 
-    <form action="/read" method="GET">
-      <input class="btn btn-success" value="Read by User" type="submit">     
-    </form>
+    <a href="/read" class="btn btn-success">Read by User</a>
+    <a href="/popRankDaily" class="btn btn-primary">Hot daily articles</a>
+    <a href="/popRankWeekly" class="btn btn-primary">Hot weekly articles</a>
+    <a href="/popRankMonthly" class="btn btn-primary">Hot monthly articles</a>
+
 
     <% articles.forEach(article => { %>
       <div class="card mt-4">
