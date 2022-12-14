@@ -12,8 +12,6 @@ const fs = require('fs')
 const Article = require('./models/article.js')
 const Read = require('./models/read.js')
 const User = require('./models/user.js')
-const localStorage = require('localStorage')
-
 
 const { render } = require('ejs')
 const { GridFsStorage } = require('multer-gridfs-storage/lib/gridfs.js')
