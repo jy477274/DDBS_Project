@@ -4,9 +4,8 @@ const readSchema = new mongoose.Schema({
     timestamp: {
       type: String
     },
-
     id: {
-      type: String
+      type: String,
     },
     uid: {
         type: String,
@@ -29,6 +28,15 @@ const readSchema = new mongoose.Schema({
         type: String
     },
     commentDetail:{
+        type: String
+    },
+    region: {
+        type: String
+    },
+    category: {
+        type: String
+    },
+    article_ts: {
         type: String
     }
   })

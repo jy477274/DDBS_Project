@@ -175,16 +175,31 @@ app.delete('/del/:aid', async (req, res) => {
 
 
 //show contents of an article (CANNOT GET /id) --> now can get
+let read_count = 0
 app.get('/show/:aid', async (req, res) => {
   const article = await Article.find({aid: req.params.aid}, )
+  const user = await User.find({uid: current_user}, )
+  
   if (article == null) res.redirect('/')
+  //get the comment detail from read entries for the given article
+  const read_article = await Read.find({aid: article[0].aid}, )
 
   //save an entry to the read table for this article and user
   var read1 = new Read({
     timestamp: Date.now().toString(),
+    id: "R"+read_count.toString(),
     uid: current_user.toString(),
-    aid: article[0].aid.toString()
+    aid: article[0].aid.toString(),
+    readTimeLength: "10",
+    agreeOrNot: "0",
+    commentOrNot: "0",
+    shareOrNot: "0",
+    commentDetail: read_article[0].commentDetail,
+    region: user[0].region,
+    category: article[0].category,
+    article_ts: article[0].timestamp
   })
+  read_count = read_count + 1
 
   read1.save(function (err, read){
     if(err) return console.error(err)
@@ -210,26 +225,6 @@ app.get('/show/:aid', async (req, res) => {
       text:buffer}) 
 
   })
-  /*
-  const article_images = article[0].image.split(",").filter(i=>i)
-  let image_data = []
-  let image_buffer = []
-  //if there exists images in the array, fetch from gridfs, store, and send to front end
-  if (article_images.length) {
-
-    article_images.forEach(function(image_name){
-      var image_file = gridfs.files.findOne({filename:image_name})
-      var image_stream = gridfsBucket.openDownloadStream(image_file._id)
-
-      image_stream.on('data', function(chunk){
-        image_buffer.push(chunk)
-      })
-
-      image_stream.on('end', function(){
-        //var image = Buffer.concat(image_buffer)
-      })
-    })
-  }*/
 })
 
 
