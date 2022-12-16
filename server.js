@@ -171,37 +171,66 @@ app.delete('/del/:aid', async (req, res) => {
   await Article.deleteOne({aid: req.params.aid})
   return res.redirect('/')
 })
+
+
+
 //show contents of an article (CANNOT GET /id) --> now can get
 app.get('/show/:aid', async (req, res) => {
   const article = await Article.find({aid: req.params.aid}, )
   if (article == null) res.redirect('/')
 
+  //save an entry to the read table for this article and user
+  var read1 = new Read({
+    timestamp: Date.now().toString(),
+    uid: current_user.toString(),
+    aid: article[0].aid.toString()
+  })
+
+  read1.save(function (err, read){
+    if(err) return console.error(err)
+    console.log("Read saved successfully")
+  })
+
   //get the article text file name
   const article_text = article[0].text
 
   //read the contents of the file from gridfs
-  const file = await gridfs.files.findOne({filename:article_text})
+  const text_file = await gridfs.files.findOne({filename:article_text})
   var buffer = ""
-  var readStream = gridfsBucket.openDownloadStream(file._id)
+  var readStream = gridfsBucket.openDownloadStream(text_file._id)
 
   readStream.on('data', function(chunk){
     buffer += chunk
   })
 
-  //when finished grabbng all of the chunks, show on console
+  //when finished grabbng all of the text chunks, show on console
   readStream.on('end', function(){
     res.render('articles/show.ejs', { 
       article: article[0],
-      text:buffer})
+      text:buffer}) 
+
   })
+  /*
+  const article_images = article[0].image.split(",").filter(i=>i)
+  let image_data = []
+  let image_buffer = []
+  //if there exists images in the array, fetch from gridfs, store, and send to front end
+  if (article_images.length) {
 
-  
+    article_images.forEach(function(image_name){
+      var image_file = gridfs.files.findOne({filename:image_name})
+      var image_stream = gridfsBucket.openDownloadStream(image_file._id)
+
+      image_stream.on('data', function(chunk){
+        image_buffer.push(chunk)
+      })
+
+      image_stream.on('end', function(){
+        //var image = Buffer.concat(image_buffer)
+      })
+    })
+  }*/
 })
-
-//show articles that a given user has read
-
-
-//show popular articles(requires be read table)
 
 
 app.use('/articles', router)

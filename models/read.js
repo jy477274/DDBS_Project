@@ -6,8 +6,7 @@ const readSchema = new mongoose.Schema({
     },
 
     id: {
-      type: String,
-      required: true
+      type: String
     },
     uid: {
         type: String,
@@ -17,13 +16,7 @@ const readSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    readOrNot: {
-        type: String
-    },
     readTimeLength:{
-        type: String
-    },
-    readSequence: {
         type: String
     },
     agreeOrNot:{
@@ -37,17 +30,7 @@ const readSchema = new mongoose.Schema({
     },
     commentDetail:{
         type: String
-    },
-    region: {
-        type: String
-    },
-    category: {
-        type: String
-    },
-    article_ts: {
-        type: String
     }
-
   })
   
   
