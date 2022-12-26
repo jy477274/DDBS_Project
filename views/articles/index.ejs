@@ -45,9 +45,6 @@
           </div>
           <div class="card-text mb-2"><%= article.abstract %></div>
           <a href="/show/<%= article.aid %>" class="btn btn-primary">Read More</a>
-          <form action="/del/<%= article.aid %>?_method=DELETE" method="POST" class="d-inline">
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
         </div>
       </div>
     <% }) %>

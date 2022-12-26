@@ -44,8 +44,6 @@ db.on('error', err =>{
 })
 
 //connect to GridFS and store reference
-//The bucket is the new way to access data since accessing from
-//gridfs-stream directly is deprecated
 let gridfs
 grid_connect.once('open', () =>{
 
@@ -122,7 +120,6 @@ app.get('/', (req, res) =>{
 
 //redirect to user-read page and send in articles grouped by UID
 //displays one article and then throws
-//currently works for UID:0
 app.get('/read', (req, res) =>{
   if (current_user==null){
     user = ""
@@ -166,11 +163,7 @@ app.get('/popRankMonthly', (req, res) => {
   })
 })
 
-//delete an article (CANNOT DELETE /id) --> now can delete
-app.delete('/del/:aid', async (req, res) => {
-  await Article.deleteOne({aid: req.params.aid})
-  return res.redirect('/')
-})
+
 //show contents of an article (CANNOT GET /id) --> now can get
 app.get('/show/:aid', async (req, res) => {
   const article = await Article.find({aid: req.params.aid}, )
@@ -197,12 +190,6 @@ app.get('/show/:aid', async (req, res) => {
 
   
 })
-
-//show articles that a given user has read
-
-
-//show popular articles(requires be read table)
-
 
 app.use('/articles', router)
 
