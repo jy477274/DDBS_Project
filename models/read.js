@@ -4,10 +4,8 @@ const readSchema = new mongoose.Schema({
     timestamp: {
       type: String
     },
-
     id: {
       type: String,
-      required: true
     },
     uid: {
         type: String,
@@ -17,13 +15,7 @@ const readSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    readOrNot: {
-        type: String
-    },
     readTimeLength:{
-        type: String
-    },
-    readSequence: {
         type: String
     },
     agreeOrNot:{
@@ -47,7 +39,6 @@ const readSchema = new mongoose.Schema({
     article_ts: {
         type: String
     }
-
   })
   
   

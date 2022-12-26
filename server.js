@@ -163,32 +163,62 @@ app.get('/popRankMonthly', (req, res) => {
   })
 })
 
-
+//delete an article (CANNOT DELETE /id) --> now can delete
+app.delete('/del/:aid', async (req, res) => {
+  await Article.deleteOne({aid: req.params.aid})
+  return res.redirect('/')
+})
 //show contents of an article (CANNOT GET /id) --> now can get
+let read_count = 0
 app.get('/show/:aid', async (req, res) => {
   const article = await Article.find({aid: req.params.aid}, )
+  const user = await User.find({uid: current_user}, )
+  
   if (article == null) res.redirect('/')
+  //get the comment detail from read entries for the given article
+  const read_article = await Read.find({aid: article[0].aid}, )
+
+  //save an entry to the read table for this article and user
+  var read1 = new Read({
+    timestamp: Date.now().toString(),
+    id: "R"+read_count.toString(),
+    uid: current_user.toString(),
+    aid: article[0].aid.toString(),
+    readTimeLength: "10",
+    agreeOrNot: "0",
+    commentOrNot: "0",
+    shareOrNot: "0",
+    commentDetail: read_article[0].commentDetail,
+    region: user[0].region,
+    category: article[0].category,
+    article_ts: article[0].timestamp
+  })
+  read_count = read_count + 1
+
+  read1.save(function (err, read){
+    if(err) return console.error(err)
+    console.log("Read saved successfully")
+  })
 
   //get the article text file name
   const article_text = article[0].text
 
   //read the contents of the file from gridfs
-  const file = await gridfs.files.findOne({filename:article_text})
+  const text_file = await gridfs.files.findOne({filename:article_text})
   var buffer = ""
-  var readStream = gridfsBucket.openDownloadStream(file._id)
+  var readStream = gridfsBucket.openDownloadStream(text_file._id)
 
   readStream.on('data', function(chunk){
     buffer += chunk
   })
 
-  //when finished grabbng all of the chunks, show on console
+  //when finished grabbng all of the text chunks, show on console
   readStream.on('end', function(){
     res.render('articles/show.ejs', { 
       article: article[0],
-      text:buffer})
-  })
+      text:buffer}) 
 
-  
+  })
 })
 
 app.use('/articles', router)
